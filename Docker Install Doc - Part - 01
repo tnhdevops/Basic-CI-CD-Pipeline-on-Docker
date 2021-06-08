@@ -1,0 +1,510 @@
+Installing Docker Engine on Oracle Enterprise Linux 7.8
+=======================================================
+
+Please note in the document the output of the command also given, all the commands are with 
+# propmpt
+
+[root@ora121 ~]# docker
+bash: docker: command not found...
+
+
+[root@ora121 ~]# yum install -y yum-utils zip unzip
+
+[root@ora121 ~]# 
+[root@ora121 ~]# yum-config-manager --enable ol7_optional_latest
+
+
+Loaded plugins: langpacks
+========================== repo: ol7_optional_latest ===========================
+[ol7_optional_latest]
+async = True
+bandwidth = 0
+base_persistdir = /var/lib/yum/repos/x86_64/7Server
+baseurl = https://yum.oracle.com/repo/OracleLinux/OL7/optional/latest/x86_64/
+cache = 0
+cachedir = /var/cache/yum/x86_64/7Server/ol7_optional_latest
+check_config_file_age = True
+compare_providers_priority = 80
+cost = 1000
+deltarpm_metadata_percentage = 100
+deltarpm_percentage = 
+enabled = 1
+enablegroups = True
+exclude = 
+failovermethod = priority
+ftp_disable_epsv = False
+gpgcadir = /var/lib/yum/repos/x86_64/7Server/ol7_optional_latest/gpgcadir
+gpgcakey = 
+gpgcheck = True
+gpgdir = /var/lib/yum/repos/x86_64/7Server/ol7_optional_latest/gpgdir
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+hdrdir = /var/cache/yum/x86_64/7Server/ol7_optional_latest/headers
+http_caching = all
+includepkgs = 
+ip_resolve = 
+keepalive = True
+keepcache = False
+mddownloadpolicy = sqlite
+mdpolicy = group:small
+mediaid = 
+metadata_expire = 21600
+metadata_expire_filter = read-only:present
+metalink = 
+minrate = 0
+mirrorlist = 
+mirrorlist_expire = 86400
+name = Oracle Linux 7Server Optional Latest (x86_64)
+old_base_cache_dir = 
+password = 
+persistdir = /var/lib/yum/repos/x86_64/7Server/ol7_optional_latest
+pkgdir = /var/cache/yum/x86_64/7Server/ol7_optional_latest/packages
+proxy = False
+proxy_dict = 
+proxy_password = 
+proxy_username = 
+repo_gpgcheck = False
+retries = 10
+skip_if_unavailable = False
+ssl_check_cert_permissions = True
+sslcacert = 
+sslclientcert = 
+sslclientkey = 
+sslverify = True
+throttle = 0
+timeout = 30.0
+ui_id = ol7_optional_latest/x86_64
+ui_repoid_vars = releasever,
+   basearch
+username = 
+
+[root@ora121 ~]# yum-config-manager --enable ol7_addons
+Loaded plugins: langpacks
+=============================== repo: ol7_addons ===============================
+[ol7_addons]
+async = True
+bandwidth = 0
+base_persistdir = /var/lib/yum/repos/x86_64/7Server
+baseurl = https://yum.oracle.com/repo/OracleLinux/OL7/addons/x86_64/
+cache = 0
+cachedir = /var/cache/yum/x86_64/7Server/ol7_addons
+check_config_file_age = True
+compare_providers_priority = 80
+cost = 1000
+deltarpm_metadata_percentage = 100
+deltarpm_percentage = 
+enabled = 1
+enablegroups = True
+exclude = 
+failovermethod = priority
+ftp_disable_epsv = False
+gpgcadir = /var/lib/yum/repos/x86_64/7Server/ol7_addons/gpgcadir
+gpgcakey = 
+gpgcheck = True
+gpgdir = /var/lib/yum/repos/x86_64/7Server/ol7_addons/gpgdir
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+hdrdir = /var/cache/yum/x86_64/7Server/ol7_addons/headers
+http_caching = all
+includepkgs = 
+ip_resolve = 
+keepalive = True
+keepcache = False
+mddownloadpolicy = sqlite
+mdpolicy = group:small
+mediaid = 
+metadata_expire = 21600
+metadata_expire_filter = read-only:present
+metalink = 
+minrate = 0
+mirrorlist = 
+mirrorlist_expire = 86400
+name = Oracle Linux 7Server Add ons (x86_64)
+old_base_cache_dir = 
+password = 
+persistdir = /var/lib/yum/repos/x86_64/7Server/ol7_addons
+pkgdir = /var/cache/yum/x86_64/7Server/ol7_addons/packages
+proxy = False
+proxy_dict = 
+proxy_password = 
+proxy_username = 
+repo_gpgcheck = False
+retries = 10
+skip_if_unavailable = False
+ssl_check_cert_permissions = True
+sslcacert = 
+sslclientcert = 
+sslclientkey = 
+sslverify = True
+throttle = 0
+timeout = 30.0
+ui_id = ol7_addons/x86_64
+ui_repoid_vars = releasever,
+   basearch
+username = 
+
+[root@ora121 ~]# yum install -y oraclelinux-developer-release-el7
+Loaded plugins: langpacks, ulninfo
+Existing lock /var/run/yum.pid: another copy is running as pid 20061.
+Another app is currently holding the yum lock; waiting for it to exit...
+  The other application is: PackageKit
+    Memory : 235 M RSS (657 MB VSZ)
+    Started: Mon Jun  7 21:56:27 2021 - 00:24 ago
+    State  : Running, pid: 20061
+Another app is currently holding the yum lock; waiting for it to exit...
+  The other application is: PackageKit
+    Memory : 235 M RSS (657 MB VSZ)
+    Started: Mon Jun  7 21:56:27 2021 - 00:26 ago
+    State  : Running, pid: 20061
+Another app is currently holding the yum lock; waiting for it to exit...
+  The other application is: PackageKit
+    Memory : 235 M RSS (657 MB VSZ)
+    Started: Mon Jun  7 21:56:27 2021 - 00:28 ago
+    State  : Running, pid: 20061
+Another app is currently holding the yum lock; waiting for it to exit...
+  The other application is: PackageKit
+    Memory : 235 M RSS (657 MB VSZ)
+    Started: Mon Jun  7 21:56:27 2021 - 00:30 ago
+    State  : Running, pid: 20061
+^C
+
+Exiting on user cancel.
+[root@ora121 ~]# kill -9 20061
+bash: kill: (20061) - No such process
+[root@ora121 ~]# yum install -y oraclelinux-developer-release-el7
+Loaded plugins: langpacks, ulninfo
+ol7_latest                                               | 2.7 kB     00:00     
+ol7_optional_latest                                      | 2.5 kB     00:00     
+Resolving Dependencies
+--> Running transaction check
+---> Package oraclelinux-developer-release-el7.x86_64 0:1.0-6.el7 will be installed
+--> Processing Dependency: oraclelinux-release-el7 >= 1.0-14 for package: oraclelinux-developer-release-el7-1.0-6.el7.x86_64
+--> Running transaction check
+---> Package oraclelinux-release-el7.x86_64 0:1.0-11.el7 will be updated
+---> Package oraclelinux-release-el7.x86_64 0:1.0-16.el7 will be an update
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package                             Arch     Version        Repository    Size
+================================================================================
+Installing:
+ oraclelinux-developer-release-el7   x86_64   1.0-6.el7      ol7_latest    14 k
+Updating for dependencies:
+ oraclelinux-release-el7             x86_64   1.0-16.el7     ol7_latest    22 k
+
+Transaction Summary
+================================================================================
+Install  1 Package
+Upgrade             ( 1 Dependent package)
+
+Total size: 37 k
+Total download size: 14 k
+Downloading packages:
+oraclelinux-developer-release-el7-1.0-6.el7.x86_64.rpm     |  14 kB   00:02     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+Warning: RPMDB altered outside of yum.
+  Updating   : oraclelinux-release-el7-1.0-16.el7.x86_64                    1/3 
+warning: /etc/yum.repos.d/oracle-linux-ol7.repo created as /etc/yum.repos.d/oracle-linux-ol7.repo.rpmnew
+  Installing : oraclelinux-developer-release-el7-1.0-6.el7.x86_64           2/3 
+  Cleanup    : oraclelinux-release-el7-1.0-11.el7.x86_64                    3/3 
+  Verifying  : oraclelinux-release-el7-1.0-16.el7.x86_64                    1/3 
+  Verifying  : oraclelinux-developer-release-el7-1.0-6.el7.x86_64           2/3 
+  Verifying  : oraclelinux-release-el7-1.0-11.el7.x86_64                    3/3 
+
+Installed:
+  oraclelinux-developer-release-el7.x86_64 0:1.0-6.el7                          
+
+Dependency Updated:
+  oraclelinux-release-el7.x86_64 0:1.0-16.el7                                   
+
+Complete!
+[root@ora121 ~]# yum-config-manager --enable ol7_developer
+Loaded plugins: langpacks
+============================= repo: ol7_developer ==============================
+[ol7_developer]
+async = True
+bandwidth = 0
+base_persistdir = /var/lib/yum/repos/x86_64/7Server
+baseurl = https://yum.oracle.com/repo/OracleLinux/OL7/developer/x86_64/
+cache = 0
+cachedir = /var/cache/yum/x86_64/7Server/ol7_developer
+check_config_file_age = True
+compare_providers_priority = 80
+cost = 1000
+deltarpm_metadata_percentage = 100
+deltarpm_percentage = 
+enabled = True
+enablegroups = True
+exclude = 
+failovermethod = priority
+ftp_disable_epsv = False
+gpgcadir = /var/lib/yum/repos/x86_64/7Server/ol7_developer/gpgcadir
+gpgcakey = 
+gpgcheck = True
+gpgdir = /var/lib/yum/repos/x86_64/7Server/ol7_developer/gpgdir
+gpgkey = file:///etc/pki/rpm-gpg/RPM-GPG-KEY-oracle
+hdrdir = /var/cache/yum/x86_64/7Server/ol7_developer/headers
+http_caching = all
+includepkgs = 
+ip_resolve = 
+keepalive = True
+keepcache = False
+mddownloadpolicy = sqlite
+mdpolicy = group:small
+mediaid = 
+metadata_expire = 21600
+metadata_expire_filter = read-only:present
+metalink = 
+minrate = 0
+mirrorlist = 
+mirrorlist_expire = 86400
+name = Oracle Linux 7Server Development Packages (x86_64)
+old_base_cache_dir = 
+password = 
+persistdir = /var/lib/yum/repos/x86_64/7Server/ol7_developer
+pkgdir = /var/cache/yum/x86_64/7Server/ol7_developer/packages
+proxy = False
+proxy_dict = 
+proxy_password = 
+proxy_username = 
+repo_gpgcheck = False
+retries = 10
+skip_if_unavailable = False
+ssl_check_cert_permissions = True
+sslcacert = 
+sslclientcert = 
+sslclientkey = 
+sslverify = True
+throttle = 0
+timeout = 30.0
+ui_id = ol7_developer/x86_64
+ui_repoid_vars = releasever,
+   basearch
+username = 
+
+[root@ora121 ~]# yum install -y docker-engine 
+Loaded plugins: langpacks, ulninfo
+ol7_developer                                            | 2.5 kB     00:00     
+Resolving Dependencies
+--> Running transaction check
+---> Package docker-engine.x86_64 0:19.03.11.ol-9.el7 will be installed
+--> Processing Dependency: container-selinux >= 2:2.77 for package: docker-engine-19.03.11.ol-9.el7.x86_64
+--> Processing Dependency: containerd for package: docker-engine-19.03.11.ol-9.el7.x86_64
+--> Processing Dependency: runc for package: docker-engine-19.03.11.ol-9.el7.x86_64
+--> Processing Dependency: docker-cli for package: docker-engine-19.03.11.ol-9.el7.x86_64
+--> Running transaction check
+---> Package container-selinux.noarch 2:2.119.2-1.911c772.el7_8 will be installed
+---> Package containerd.x86_64 0:1.3.9-2.el7 will be installed
+---> Package docker-cli.x86_64 0:19.03.11.ol-9.el7 will be installed
+---> Package runc.x86_64 2:1.0.0-92.rc92.el7 will be installed
+--> Processing Dependency: criu for package: 2:runc-1.0.0-92.rc92.el7.x86_64
+--> Running transaction check
+---> Package criu.x86_64 0:3.12-2.el7 will be installed
+--> Processing Dependency: libprotobuf-c.so.1(LIBPROTOBUF_C_1.0.0)(64bit) for package: criu-3.12-2.el7.x86_64
+--> Processing Dependency: libnet.so.1()(64bit) for package: criu-3.12-2.el7.x86_64
+--> Processing Dependency: libprotobuf-c.so.1()(64bit) for package: criu-3.12-2.el7.x86_64
+--> Running transaction check
+---> Package libnet.x86_64 0:1.1.6-7.el7 will be installed
+---> Package protobuf-c.x86_64 0:1.0.2-3.el7 will be installed
+--> Finished Dependency Resolution
+
+Dependencies Resolved
+
+================================================================================
+ Package             Arch     Version                     Repository       Size
+================================================================================
+Installing:
+ docker-engine       x86_64   19.03.11.ol-9.el7           ol7_addons       21 M
+Installing for dependencies:
+ container-selinux   noarch   2:2.119.2-1.911c772.el7_8   ol7_developer    39 k
+ containerd          x86_64   1.3.9-2.el7                 ol7_addons       27 M
+ criu                x86_64   3.12-2.el7                  ol7_latest      452 k
+ docker-cli          x86_64   19.03.11.ol-9.el7           ol7_addons       33 M
+ libnet              x86_64   1.1.6-7.el7                 ol7_latest       57 k
+ protobuf-c          x86_64   1.0.2-3.el7                 ol7_latest       27 k
+ runc                x86_64   2:1.0.0-92.rc92.el7         ol7_addons      2.9 M
+
+Transaction Summary
+================================================================================
+Install  1 Package (+7 Dependent packages)
+
+Total download size: 84 M
+Installed size: 348 M
+Downloading packages:
+(1/8): criu-3.12-2.el7.x86_64.rpm                          | 452 kB   00:01     
+(2/8): container-selinux-2.119.2-1.911c772.el7_8.noarch.rp |  39 kB   00:02     
+(3/8): docker-cli-19.03.11.ol-9.el7.x86_64.rpm             |  33 MB   00:33     
+(4/8): protobuf-c-1.0.2-3.el7.x86_64.rpm                   |  27 kB   00:03     
+(5/8): libnet-1.1.6-7.el7.x86_64.rpm                       |  57 kB   00:03     
+(6/8): containerd-1.3.9-2.el7.x86_64.rpm                   |  27 MB   00:46     
+(7/8): runc-1.0.0-92.rc92.el7.x86_64.rpm                   | 2.9 MB   00:04     
+(8/8): docker-engine-19.03.11.ol-9.el7.x86_64.rpm          |  21 MB   00:20     
+--------------------------------------------------------------------------------
+Total                                              1.6 MB/s |  84 MB  00:54     
+Running transaction check
+Running transaction test
+Transaction test succeeded
+Running transaction
+  Installing : 2:container-selinux-2.119.2-1.911c772.el7_8.noarch           1/8 
+  Installing : containerd-1.3.9-2.el7.x86_64                                2/8 
+  Installing : libnet-1.1.6-7.el7.x86_64                                    3/8 
+  Installing : docker-cli-19.03.11.ol-9.el7.x86_64                          4/8 
+  Installing : protobuf-c-1.0.2-3.el7.x86_64                                5/8 
+  Installing : criu-3.12-2.el7.x86_64                                       6/8 
+  Installing : 2:runc-1.0.0-92.rc92.el7.x86_64                              7/8 
+  Installing : docker-engine-19.03.11.ol-9.el7.x86_64                       8/8 
+xfs_info: /var/lib is not a mounted XFS filesystem
+  Verifying  : protobuf-c-1.0.2-3.el7.x86_64                                1/8 
+  Verifying  : criu-3.12-2.el7.x86_64                                       2/8 
+  Verifying  : docker-cli-19.03.11.ol-9.el7.x86_64                          3/8 
+  Verifying  : docker-engine-19.03.11.ol-9.el7.x86_64                       4/8 
+  Verifying  : 2:runc-1.0.0-92.rc92.el7.x86_64                              5/8 
+  Verifying  : containerd-1.3.9-2.el7.x86_64                                6/8 
+  Verifying  : libnet-1.1.6-7.el7.x86_64                                    7/8 
+  Verifying  : 2:container-selinux-2.119.2-1.911c772.el7_8.noarch           8/8 
+
+Installed:
+  docker-engine.x86_64 0:19.03.11.ol-9.el7                                      
+
+Dependency Installed:
+  container-selinux.noarch 2:2.119.2-1.911c772.el7_8                            
+  containerd.x86_64 0:1.3.9-2.el7                                               
+  criu.x86_64 0:3.12-2.el7                                                      
+  docker-cli.x86_64 0:19.03.11.ol-9.el7                                         
+  libnet.x86_64 0:1.1.6-7.el7                                                   
+  protobuf-c.x86_64 0:1.0.2-3.el7                                               
+  runc.x86_64 2:1.0.0-92.rc92.el7                                               
+
+Complete!
+[root@ora121 ~]# systemctl enable docker.service
+Created symlink from /etc/systemd/system/multi-user.target.wants/docker.service to /usr/lib/systemd/system/docker.service.
+[root@ora121 ~]# systemctl start docker.service
+[root@ora121 ~]# systemctl status docker.service
+● docker.service - Docker Application Container Engine
+   Loaded: loaded (/usr/lib/systemd/system/docker.service; enabled; vendor preset: disabled)
+   Active: active (running) since Mon 2021-06-07 22:04:08 +0530; 13s ago
+     Docs: https://docs.docker.com
+ Main PID: 20798 (dockerd)
+    Tasks: 7
+   Memory: 23.9M
+   CGroup: /system.slice/docker.service
+           └─20798 /usr/bin/dockerd -H fd:// --containerd=/run/containerd/con...
+
+Jun 07 22:04:07 ora121.localdomain dockerd[20798]: time="2021-06-07T22:04:07....
+Jun 07 22:04:07 ora121.localdomain dockerd[20798]: time="2021-06-07T22:04:07....
+Jun 07 22:04:07 ora121.localdomain dockerd[20798]: time="2021-06-07T22:04:07....
+Jun 07 22:04:07 ora121.localdomain dockerd[20798]: time="2021-06-07T22:04:07....
+Jun 07 22:04:08 ora121.localdomain dockerd[20798]: time="2021-06-07T22:04:08....
+Jun 07 22:04:08 ora121.localdomain dockerd[20798]: time="2021-06-07T22:04:08....
+Jun 07 22:04:08 ora121.localdomain dockerd[20798]: time="2021-06-07T22:04:08....
+Jun 07 22:04:08 ora121.localdomain dockerd[20798]: time="2021-06-07T22:04:08....
+Jun 07 22:04:08 ora121.localdomain systemd[1]: Started Docker Application Co....
+Jun 07 22:04:08 ora121.localdomain dockerd[20798]: time="2021-06-07T22:04:08....
+Hint: Some lines were ellipsized, use -l to show in full.
+[root@ora121 ~]# docker info
+Client:
+ Debug Mode: false
+
+Server:
+ Containers: 0
+  Running: 0
+  Paused: 0
+  Stopped: 0
+ Images: 0
+ Server Version: 19.03.11-ol
+ Storage Driver: overlay2
+  Backing Filesystem: xfs
+  Supports d_type: true
+  Native Overlay Diff: false
+ Logging Driver: json-file
+ Cgroup Driver: cgroupfs
+ Plugins:
+  Volume: local
+  Network: bridge host ipvlan macvlan null overlay
+  Log: awslogs fluentd gcplogs gelf journald json-file local logentries splunk syslog
+ Swarm: inactive
+ Runtimes: runc
+ Default Runtime: runc
+ Init Binary: docker-init
+ containerd version: 
+ runc version: ff819c7e9184c13b7c2607fe6c30ae19403a7aff
+ init version: fec3683
+ Security Options:
+  seccomp
+   Profile: default
+ Kernel Version: 4.14.35-1902.302.2.el7uek.x86_64
+ Operating System: Oracle Linux Server 7.8
+ OSType: linux
+ Architecture: x86_64
+ CPUs: 1
+ Total Memory: 10.05GiB
+ Name: ora121.localdomain
+ ID: PRTX:WPZB:EIQN:QLLN:4KVY:KOQA:C4RL:2XNW:2USS:TIGT:F6RO:MDGQ
+ Docker Root Dir: /var/lib/docker
+ Debug Mode: false
+ Registry: https://index.docker.io/v1/
+ Labels:
+ Experimental: false
+ Insecure Registries:
+  127.0.0.0/8
+ Live Restore Enabled: false
+
+Registries: 
+[root@ora121 ~]# cd /var/lib/
+[root@ora121 lib]# ls
+AccountsService  dnsmasq    libvirt         polkit-1        systemd
+alsa             docker     lldpad          postfix         tpm
+alternatives     flatpak    logrotate       pulse           tuned
+authconfig       fprint     machines        rasdaemon       udisks2
+bluetooth        fwupd      misc            rpcbind         unbound
+boltd            fwupdate   mlocate         rpm             up2date
+chrony           games      mysql           rpm-state       upower
+color            gdm        net-snmp        rsyslog         VBoxGuestAdditions
+colord           geoclue    NetworkManager  samba           virtuoso
+containerd       gssproxy   nfs             selinux         xkb
+cs               hyperv     os-prober       setroubleshoot  yum
+dbus             initramfs  PackageKit      stateless
+dhclient         iscsi      plymouth        supportinfo
+[root@ora121 lib]# cd docker/
+[root@ora121 docker]# ls
+builder   containers  network   plugins   swarm  trust
+buildkit  image       overlay2  runtimes  tmp    volumes
+[root@ora121 docker]# docker version
+Client: Docker Engine - Community
+ Version:           19.03.11-ol
+ API version:       1.40
+ Go version:        go1.16.2
+ Git commit:        2a9c376
+ Built:             Thu Apr 15 17:54:26 2021
+ OS/Arch:           linux/amd64
+ Experimental:      false
+
+Server: Docker Engine - Community
+ Engine:
+  Version:          19.03.11-ol
+  API version:      1.40 (minimum version 1.12)
+  Go version:       go1.16.2
+  Git commit:       2a9c376
+  Built:            Thu Apr 15 17:52:47 2021
+  OS/Arch:          linux/amd64
+  Experimental:     false
+  Default Registry: docker.io
+ containerd:
+  Version:          v1.3.9
+  GitCommit:        
+ runc:
+  Version:          1.0.0-rc92
+  GitCommit:        ff819c7e9184c13b7c2607fe6c30ae19403a7aff
+ docker-init:
+  Version:          0.18.0
+  GitCommit:        fec3683
+[root@ora121 docker]# useradd docker_user
+[root@ora121 docker]# echo "docker_user  ALL=(ALL)  NOPASSWD: /usr/bin/docker" >> /etc/sudoers
+[root@ora121 docker]# echo "alias docker=\"sudo /usr/bin/docker\"" >> /home/docker_user/.bash_profile
+[root@ora121 docker]# su - docker_user 
+[docker_user@ora121 ~]$ vi .bash_profile
+[docker_user@ora121 ~]$ docker ps
+CONTAINER ID        IMAGE               COMMAND             CREATED             STATUS              PORTS               NAMES
