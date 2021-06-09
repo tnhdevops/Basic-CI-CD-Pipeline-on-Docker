@@ -1,0 +1,177 @@
+Ref :
+
+https://www.jenkins.io/doc/book/installing/docker/
+
+
+Jenkins on Docker
+=================
+
+[docker_user@devops ~]$ docker network create jenkins
+f76076cd81af39eac22814dfa7667bbde746808a7fe33f26c8fd9f7ba34c68f8
+[docker_user@devops ~]$ docker volume create jenkins-docker-certs
+jenkins-docker-certs
+[docker_user@devops ~]$ docker volume create jenkins-data
+jenkins-data
+[docker_user@devops ~]$ docker container run --name jenkins-docker --rm --detach \
+   --privileged --network jenkins --network-alias docker \
+   --env DOCKER_TLS_CERTDIR=/certs \
+   --volume jenkins-docker-certs:/certs/client \
+   --volume jenkins-data:/var/jenkins_home \
+   --publish 2376:2376 docker:dind
+Unable to find image 'docker:dind' locally
+Trying to pull repository docker.io/library/docker ... 
+dind: Pulling from docker.io/library/docker
+df20fa9351a1: Pull complete 
+25ad7478873d: Pull complete 
+4684f6177b5d: Pull complete 
+46e300cec669: Downloading [====================================>              ] 46e300cec669: Pull complete 
+63038576ad94: Pull complete 
+0fdb76c4706c: Pull complete 
+cb7edeffdfd5: Pull complete 
+cc28bd76800f: Pull complete 
+54196fe38f7e: Pull complete 
+2d269ba97d21: Pull complete 
+c4e35c09825f: Pull complete 
+Digest: sha256:b0847059f97cd4cf0b9b3427d40bbc882767cb3e248a18a0efd631a5873fae55
+Status: Downloaded newer image for docker:dind
+8e87d3782b60f4736b0cea749e09d66e0b6e8d53b9aedc092a05a63f68f0d6dd
+[docker_user@devops ~]$ docker container run --name jenkins-blueocean --rm --detach \
+   --network jenkins --env DOCKER_HOST=tcp://docker:2376 \
+   --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 \
+   --volume jenkins-data:/var/jenkins_home \
+   --volume jenkins-docker-certs:/certs/client:ro \
+   --publish 8080:8080 --publish 50000:50000 jenkinsci/blueocean
+
+docker container run --name jenkins-blueocean \
+   --network jenkins --env DOCKER_HOST=tcp://docker:2376 \
+   --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 \
+   --volume jenkins-data:/var/jenkins_home \
+   --volume jenkins-docker-certs:/certs/client:ro \
+   --publish 8080:8080 --publish 50000:50000 jenkinsci/blueocean
+
+Unable to find image 'jenkinsci/blueocean:latest' locally
+Trying to pull repository docker.io/jenkinsci/blueocean ... 
+latest: Pulling from docker.io/jenkinsci/blueocean
+e7c96db7181b: Pull complete 
+f910a506b6cb: Pull complete 
+c2274a1a0e27: Pull complete 
+32d53281836a: Pull complete 
+d19882e06da9: Pull complete 
+bb5ae2dd7604: Pull complete 
+da600481a343: Pull complete 
+b2eee6194b25: Pull complete 
+7e6c909f6612: Pull complete 
+bfd4a2f697a1: Pull complete 
+26ef4ee2d217: Pull complete 
+613d0d828036: Pull complete 
+be508f36e226: Pull complete 
+6fea20b6c414: Pull complete 
+cb5f343890a8: Pull complete 
+Digest: sha256:abb5f3dc9f68a8159a3f2cb0f3b043e2ca0a7d129511aff6962e21c2f86c1655
+Status: Downloaded newer image for jenkinsci/blueocean:latest
+b54567cae097300c5753a0948120ce0b6b3285da87e4b287b78c4a98fa782ad6
+[docker_user@devops ~]$ docker ps
+CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                                              NAMES
+b54567cae097        jenkinsci/blueocean   "/sbin/tini -- /usr/…"   19 seconds ago      Up 8 seconds        0.0.0.0:8080->8080/tcp, 0.0.0.0:50000->50000/tcp   jenkins-blueocean
+8e87d3782b60        docker:dind           "dockerd-entrypoint.…"   2 minutes ago       Up 2 minutes        2375/tcp, 0.0.0.0:2376->2376/tcp                   jenkins-docker
+
+061e20ae6f5d4afe9d3360129decbb1a
+
+
+[docker_user@devops var]$ docker ps
+CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                                              NAMES
+65162da3b5ea        jenkinsci/blueocean   "/sbin/tini -- /usr/…"   15 minutes ago      Up 15 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:50000->50000/tcp   jenkins-blueocean
+05b9901a384b        docker:dind           "dockerd-entrypoint.…"   15 minutes ago      Up 15 minutes       2375/tcp, 0.0.0.0:2376->2376/tcp                   jenkins-docker
+[docker_user@devops var]$ docker logs 65162da3b5ea
+[docker_user@localhost ~]$ docker logs e081c3ba8494
+Running from: /usr/share/jenkins/jenkins.war
+webroot: EnvVars.masterEnvVars.get("JENKINS_HOME")
+2020-12-20 15:39:42.141+0000 [id=1]	INFO	org.eclipse.jetty.util.log.Log#initialized: Logging initialized @1176ms to org.eclipse.jetty.util.log.JavaUtilLog
+2020-12-20 15:39:42.603+0000 [id=1]	INFO	winstone.Logger#logInternal: Beginning extraction from war file
+2020-12-20 15:39:47.257+0000 [id=1]	WARNING	o.e.j.s.handler.ContextHandler#setContextPath: Empty contextPath
+2020-12-20 15:39:47.567+0000 [id=1]	INFO	org.eclipse.jetty.server.Server#doStart: jetty-9.4.33.v20201020; built: 2020-10-20T23:39:24.803Z; git: 1be68755656cef678b79a2ef1c2ebbca99e25420; jvm 1.8.0_272-b10
+2020-12-20 15:39:49.289+0000 [id=1]	INFO	o.e.j.w.StandardDescriptorProcessor#visitServlet: NO JSP Support for /, did not find org.eclipse.jetty.jsp.JettyJspServlet
+2020-12-20 15:39:49.606+0000 [id=1]	INFO	o.e.j.s.s.DefaultSessionIdManager#doStart: DefaultSessionIdManager workerName=node0
+2020-12-20 15:39:49.606+0000 [id=1]	INFO	o.e.j.s.s.DefaultSessionIdManager#doStart: No SessionScavenger set, using defaults
+2020-12-20 15:39:49.608+0000 [id=1]	INFO	o.e.j.server.session.HouseKeeper#startScavenging: node0 Scavenging every 600000ms
+2020-12-20 15:39:51.127+0000 [id=1]	INFO	hudson.WebAppMain#contextInitialized: Jenkins home directory: /var/jenkins_home found at: EnvVars.masterEnvVars.get("JENKINS_HOME")
+2020-12-20 15:39:51.493+0000 [id=1]	INFO	o.e.j.s.handler.ContextHandler#doStart: Started w.@1f130eaf{Jenkins v2.263.1,/,file:///var/jenkins_home/war/,AVAILABLE}{/var/jenkins_home/war}
+2020-12-20 15:39:51.584+0000 [id=1]	INFO	o.e.j.server.AbstractConnector#doStart: Started ServerConnector@5c7bfdc1{HTTP/1.1, (http/1.1)}{0.0.0.0:8080}
+2020-12-20 15:39:51.585+0000 [id=1]	INFO	org.eclipse.jetty.server.Server#doStart: Started @10619ms
+2020-12-20 15:39:51.600+0000 [id=21]	INFO	winstone.Logger#logInternal: Winstone Servlet Engine running: controlPort=disabled
+2020-12-20 15:39:55.083+0000 [id=27]	INFO	jenkins.InitReactorRunner$1#onAttained: Started initialization
+2020-12-20 15:39:56.851+0000 [id=26]	INFO	hudson.PluginManager#considerDetachedPlugin: Loading a detached plugin as a dependency: /var/jenkins_home/plugins/bouncycastle-api.jpi
+2020-12-20 15:39:57.048+0000 [id=26]	INFO	hudson.PluginManager#considerDetachedPlugin: Loading a detached plugin as a dependency: /var/jenkins_home/plugins/command-launcher.jpi
+2020-12-20 15:39:57.080+0000 [id=26]	INFO	hudson.PluginManager#considerDetachedPlugin: Loading a detached plugin as a dependency: /var/jenkins_home/plugins/jdk-tool.jpi
+2020-12-20 15:40:03.429+0000 [id=26]	INFO	jenkins.InitReactorRunner$1#onAttained: Listed all plugins
+2020-12-20 15:40:03.712+0000 [id=26]	INFO	j.b.a.SecurityProviderInitializer#addSecurityProvider: Initializing Bouncy Castle security provider.
+2020-12-20 15:40:04.584+0000 [id=26]	INFO	j.b.a.SecurityProviderInitializer#addSecurityProvider: Bouncy Castle security provider initialized.
+2020-12-20 15:40:23.284+0000 [id=26]	INFO	jenkins.InitReactorRunner$1#onAttained: Prepared all plugins
+2020-12-20 15:40:23.439+0000 [id=26]	INFO	jenkins.InitReactorRunner$1#onAttained: Started all plugins
+2020-12-20 15:40:29.446+0000 [id=27]	INFO	jenkins.InitReactorRunner$1#onAttained: Augmented all extensions
+2020-12-20 15:40:29.677+0000 [id=27]	INFO	jenkins.InitReactorRunner$1#onAttained: System config loaded
+2020-12-20 15:40:29.677+0000 [id=27]	INFO	jenkins.InitReactorRunner$1#onAttained: System config adapted
+2020-12-20 15:40:29.677+0000 [id=27]	INFO	jenkins.InitReactorRunner$1#onAttained: Loaded all jobs
+2020-12-20 15:40:29.742+0000 [id=27]	INFO	jenkins.InitReactorRunner$1#onAttained: Configuration for all jobs updated
+2020-12-20 15:40:29.849+0000 [id=41]	INFO	hudson.model.AsyncPeriodicWork#lambda$doRun$0: Started Download metadata
+2020-12-20 15:40:29.864+0000 [id=41]	INFO	hudson.util.Retrier#start: Attempt #1 to do the action check updates server
+2020-12-20 15:40:31.246+0000 [id=26]	INFO	o.s.c.s.AbstractApplicationContext#prepareRefresh: Refreshing org.springframework.web.context.support.StaticWebApplicationContext@689db912: display name [Root WebApplicationContext]; startup date [Sun Dec 20 15:40:31 GMT 2020]; root of context hierarchy
+2020-12-20 15:40:31.246+0000 [id=26]	INFO	o.s.c.s.AbstractApplicationContext#obtainFreshBeanFactory: Bean factory for application context [org.springframework.web.context.support.StaticWebApplicationContext@689db912]: org.springframework.beans.factory.support.DefaultListableBeanFactory@4891ee0e
+2020-12-20 15:40:31.273+0000 [id=26]	INFO	o.s.b.f.s.DefaultListableBeanFactory#preInstantiateSingletons: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@4891ee0e: defining beans [authenticationManager]; root of factory hierarchy
+2020-12-20 15:40:31.719+0000 [id=26]	INFO	o.s.c.s.AbstractApplicationContext#prepareRefresh: Refreshing org.springframework.web.context.support.StaticWebApplicationContext@191d67cb: display name [Root WebApplicationContext]; startup date [Sun Dec 20 15:40:31 GMT 2020]; root of context hierarchy
+2020-12-20 15:40:31.719+0000 [id=26]	INFO	o.s.c.s.AbstractApplicationContext#obtainFreshBeanFactory: Bean factory for application context [org.springframework.web.context.support.StaticWebApplicationContext@191d67cb]: org.springframework.beans.factory.support.DefaultListableBeanFactory@78abd2cb
+2020-12-20 15:40:31.734+0000 [id=26]	INFO	o.s.b.f.s.DefaultListableBeanFactory#preInstantiateSingletons: Pre-instantiating singletons in org.springframework.beans.factory.support.DefaultListableBeanFactory@78abd2cb: defining beans [filter,legacy]; root of factory hierarchy
+2020-12-20 15:40:32.812+0000 [id=26]	INFO	jenkins.install.SetupWizard#init: 
+
+*************************************************************
+*************************************************************
+*************************************************************
+
+Jenkins initial setup is required. An admin user has been created and a password generated.
+Please use the following password to proceed to installation:
+
+061e20ae6f5d4afe9d3360129decbb1a
+
+This may also be found at: /var/jenkins_home/secrets/initialAdminPassword
+
+*************************************************************
+*************************************************************
+*************************************************************
+
+[docker_user@devops var]$ docker ps
+CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                                              NAMES
+65162da3b5ea        jenkinsci/blueocean   "/sbin/tini -- /usr/…"   20 minutes ago      Up 20 minutes       0.0.0.0:8080->8080/tcp, 0.0.0.0:50000->50000/tcp   jenkins-blueocean
+05b9901a384b        docker:dind           "dockerd-entrypoint.…"   21 minutes ago      Up 21 minutes       2375/tcp, 0.0.0.0:2376->2376/tcp                   jenkins-docker
+
+
+lets connect to the container and check the same password where it show in above logs
+
+
+[docker_user@devops var]$ docker container exec -it 65162da3b5ea /bin/bash
+
+bash-5.0$ cd /var/jenkins_home/secrets/
+bash-5.0$ ls
+filepath-filters.d    jenkins.model.Jenkins.crumbSalt  org.jenkinsci.main.modules.instance_identity.InstanceIdentity.KEY  whitelisted-callables.d
+initialAdminPassword  master.key		       slave-to-master-security-kill-switch
+bash-5.0$ cat initialAdminPassword 
+061e20ae6f5d4afe9d3360129decbb1a
+bash-5.0$ 
+
+
+http://10.0.2.15:8080/
+
+enter the above initial password 
+
+install suggested plugins
+
+create the fisrt admin user
+
+give the instance url
+ 
+
+
+
+
+
+  
+  
