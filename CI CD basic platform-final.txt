@@ -1,0 +1,447 @@
+Step 1
+======
+
+  create a github account.
+
+  visit below github account  and  download the sample  java program by clicking  clone or download button .
+https://github.com/tnhdevops/hello-world
+
+ fork the repo to your git account.
+
+Step 2
+======
+
+ Setup Jenkins Docker - follow docker install doc - part -01 and Part - 02 
+
+  docker container run --name jenkins-blueocean --rm --detach \
+   --network jenkins --env DOCKER_HOST=tcp://docker:2376 \
+   --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 \
+   --volume jenkins-data:/var/jenkins_home \
+   --volume jenkins-docker-certs:/certs/client:ro \
+   --publish 8080:8080 --publish 50000:50000 jenkinsci/blueocean
+b5750af6abac62e9e9b14a209917682edb7149beb9af4c47b712e051a17316e3
+
+
+docker run --name jenkins-blueocean --rm --detach \
+  --network jenkins --env DOCKER_HOST=tcp://docker:2376 \
+  --env DOCKER_CERT_PATH=/certs/client --env DOCKER_TLS_VERIFY=1 \
+  --publish 8080:8080 --publish 50000:50000 \
+  --volume jenkins-data:/var/jenkins_home \
+  --volume jenkins-docker-certs:/certs/client:ro \
+  myjenkins-blueocean:1.1
+
+
+Step 3
+======
+
+Setup Maven in Jenkins 
+
+ as the sample project is a maven based project (pom.xml) maven tool configuration is required 
+in Jenkins
+
+ goto --> manage jenkins --> global tool configuration -- > add maven - Just give a name and select 
+install automatic
+
+
+step 4 
+======
+
+ Test the CI environment 
+
+Create a new maven project in jenkins 
+ if maven project type not appearing install maven intergration plugin
+
+ under source code management selec git
+
+ enter the above clone url 
+ and create the credential
+ and select
+
+ keep the master branch selected
+ 
+ under build leave the default root POM  pom.xml
+
+ for build goals  give "clean install package"
+
+ save the project and build.
+ 
+observe the console output. look for .jar and .war files 
+
+
+[INFO] Maven Project ...................................... SUCCESS [  1.454 s]
+[INFO] Server ............................................. SUCCESS [  7.539 s]
+[INFO] Webapp ............................................. SUCCESS [  2.315 s]
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD SUCCESS
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  13.869 s
+[INFO] Finished at: 2020-07-22T16:54:03Z
+[INFO] ------------------------------------------------------------------------
+Waiting for Jenkins to finish collecting data
+[JENKINS] Archiving /var/jenkins_home/workspace/m1/webapp/pom.xml to com.example.maven-project/webapp/1.0-SNAPSHOT/webapp-1.0-SNAPSHOT.pom
+[JENKINS] Archiving /var/jenkins_home/workspace/m1/webapp/target/webapp.war to com.example.maven-project/webapp/1.0-SNAPSHOT/webapp-1.0-SNAPSHOT.war
+[JENKINS] Archiving /var/jenkins_home/workspace/m1/server/pom.xml to com.example.maven-project/server/1.0-SNAPSHOT/server-1.0-SNAPSHOT.pom
+[JENKINS] Archiving /var/jenkins_home/workspace/m1/server/target/server.jar to com.example.maven-project/server/1.0-SNAPSHOT/server-1.0-SNAPSHOT.jar
+[JENKINS] Archiving /var/jenkins_home/workspace/m1/pom.xml to com.example.maven-project/maven-project/1.0-SNAPSHOT/maven-project-1.0-SNAPSHOT.pom
+channel stopped
+Finished: SUCCESS
+
+   CI  -- CD
+
+  REPO - GIT -- > Chekin -- > Build ---->  STAGE----> Deploy
+
+                                                      TOCAT -- Docker 
+
+  
+ Building CD Pipeline 
+=====================
+
+ Step 5
+ ======
+
+ we will need to setup tomcat webserver on  docker as we are deploying a web app wia tomcat
+
+ first lets pull a centos image
+
+[docker_user@devops ~]$ docker pull centos
+Using default tag: latest
+Trying to pull repository docker.io/library/centos ... 
+latest: Pulling from docker.io/library/centos
+6910e5a164f7: Pull complete 
+Digest: sha256:4062bbdd1bb0801b0aa38e0f83dece70fb7a5e9bce223423a68de2d8b784b43b
+Status: Downloaded newer image for centos:latest
+
+start the the container by attaching to jenkins network as both containers  must be in the sane
+network to communicate
+
+ [docker_user@devops ~]$ docker run -dit --name tomcat_container --network jenkins -p 8888:8080 centos
+                                                                
+9e300e238d0559b68914891dde7c9050ef5b6fbb3908be237e0487132e77e976
+[docker_user@devops ~]$ 
+[docker_user@devops ~]$ docker ps
+CONTAINER ID        IMAGE                 COMMAND                  CREATED             STATUS              PORTS                                              NAMES
+9e300e238d05        centos                "/bin/bash"              44 seconds ago      Up 4 seconds        0.0.0.0:8888->8080/tcp                             tomcat_container
+095eb95b5179        jenkinsci/blueocean   "/sbin/tini -- /usr/…"   4 days ago          Up 4 days           0.0.0.0:8080->8080/tcp, 0.0.0.0:50000->50000/tcp   jenkins-blueocean
+ea0101f428f1        docker:dind           "dockerd-entrypoint.…"   4 days ago          Up 4 days           2375/tcp, 0.0.0.0:2376->2376/tcp                   jenkins-docker
+ 
+alpine
+
+connect to the container and install wget as it is required to setup the tomcat server with in the container
+
+[docker_user@devops ~]$ docker exec -it 9e300e238d05 bash
+[root@9e300e238d05 /]# id
+uid=0(root) gid=0(root) groups=0(root)
+[root@9e300e238d05 /]# cd /opt
+[root@9e300e238d05 opt]# yum install wget
+Failed to set locale, defaulting to C.UTF-8
+CentOS-8 - AppStream                                     186 kB/s | 5.8 MB     00:31    
+CentOS-8 - Base                                           33 kB/s | 2.2 MB     01:09    
+CentOS-8 - Extras                                        3.3 kB/s | 7.0 kB     00:02    
+Dependencies resolved.
+=========================================================================================
+ Package                       Architecture Version                Repository       Size
+=========================================================================================
+Installing:
+ wget                          x86_64       1.19.5-8.el8_1.1       AppStream       735 k
+Installing dependencies:
+ libpsl                        x86_64       0.20.2-5.el8           BaseOS           61 k
+ publicsuffix-list-dafsa       noarch       20180723-1.el8         BaseOS           56 k
+
+Transaction Summary
+=========================================================================================
+Install  3 Packages
+
+Total download size: 852 k
+Installed size: 3.0 M
+Is this ok [y/N]: y
+Downloading Packages:
+(1/3): wget-1.19.5-8.el8_1.1.x86_64.rpm                   41 kB/s | 735 kB     00:17    
+[MIRROR] libpsl-0.20.2-5.el8.x86_64.rpm: Curl error (28): Timeout was reached for http://centos.hbcse.tifr.res.in/centos/8.2.2004/BaseOS/x86_64/os/Packages/libpsl-0.20.2-5.el8.x86_64.rpm [Operation too slow. Less than 1000 bytes/sec transferred the last 30 seconds]
+[MIRROR] publicsuffix-list-dafsa-20180723-1.el8.noarch.rpm: Curl error (28): Timeout was reached for http://centos.hbcse.tifr.res.in/centos/8.2.2004/BaseOS/x86_64/os/Packages/publicsuffix-list-dafsa-20180723-1.el8.noarch.rpm [Operation too slow. Less than 1000 bytes/sec transferred the last 30 seconds]
+(2/3): publicsuffix-list-dafsa-20180723-1.el8.noarch.rpm 1.7 kB/s |  56 kB     00:32    
+(3/3): libpsl-0.20.2-5.el8.x86_64.rpm                    1.9 kB/s |  61 kB     00:32    
+-----------------------------------------------------------------------------------------
+Total                                                     25 kB/s | 852 kB     00:33     
+warning: /var/cache/dnf/AppStream-02e86d1c976ab532/packages/wget-1.19.5-8.el8_1.1.x86_64.rpm: Header V3 RSA/SHA256 Signature, key ID 8483c65d: NOKEY
+CentOS-8 - AppStream                                     1.6 MB/s | 1.6 kB     00:00    
+Importing GPG key 0x8483C65D:
+ Userid     : "CentOS (CentOS Official Signing Key) <security@centos.org>"
+ Fingerprint: 99DB 70FA E1D7 CE22 7FB6 4882 05B5 55B3 8483 C65D
+ From       : /etc/pki/rpm-gpg/RPM-GPG-KEY-centosofficial
+Is this ok [y/N]: y
+Key imported successfully
+Running transaction check
+Transaction check succeeded.
+Running transaction test
+Transaction test succeeded.
+Running transaction
+  Preparing        :                                                                 1/1 
+  Installing       : publicsuffix-list-dafsa-20180723-1.el8.noarch                   1/3 
+  Installing       : libpsl-0.20.2-5.el8.x86_64                                      2/3 
+  Installing       : wget-1.19.5-8.el8_1.1.x86_64                                    3/3 
+  Running scriptlet: wget-1.19.5-8.el8_1.1.x86_64                                    3/3 
+  Verifying        : wget-1.19.5-8.el8_1.1.x86_64                                    1/3 
+  Verifying        : libpsl-0.20.2-5.el8.x86_64                                      2/3 
+  Verifying        : publicsuffix-list-dafsa-20180723-1.el8.noarch                   3/3 
+
+Installed:
+  libpsl-0.20.2-5.el8.x86_64         publicsuffix-list-dafsa-20180723-1.el8.noarch      
+  wget-1.19.5-8.el8_1.1.x86_64      
+
+Complete!
+
+download tomcat to the container /opt 
+
+[root@9e300e238d05 opt]# wget http://apachemirror.wuchna.com/tomcat/tomcat-8/v8.5.66/bin/apache-tomcat-8.5.66.tar.gz
+
+
+--2020-07-22 06:04:58--  http://apachemirror.wuchna.com/tomcat/tomcat-8/v8.5.66/bin/apache-tomcat-8.5.66.tar.gz
+Resolving apachemirror.wuchna.com (apachemirror.wuchna.com)... 159.65.154.237
+Connecting to apachemirror.wuchna.com (apachemirror.wuchna.com)|159.65.154.237|:80... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 10379806 (9.9M) [application/x-gzip]
+Saving to: 'apache-tomcat-8.5.66.tar.gz'
+
+apache-tomcat-8.5.66.t 100%[=========================>]   9.90M  1.78MB/s    in 5.3s    
+
+2020-07-22 06:05:03 (1.87 MB/s) - 'apache-tomcat-8.5.66.tar.gz' saved [10379806/10379806]
+
+
+extract tomcat
+--------------
+
+ [root@9e300e238d05 opt]# ls
+
+apache-tomcat-8.5.66.tar.gz
+
+[root@9e300e238d05 opt]# tar -xvzf apache-tomcat-8.5.66.tar.gz 
+
+
+[root@9e300e238d05 opt]# ls
+apache-tomcat-8.5.66  apache-tomcat-8.5.66.tar.gz
+
+[root@9e300e238d05 opt]# cd apache-tomcat-8.5.66
+
+[root@9e300e238d05 apache-tomcat-8.5.66]# ls
+BUILDING.txt	 LICENSE  README.md	 RUNNING.txt  conf  logs  webapps
+CONTRIBUTING.md  NOTICE   RELEASE-NOTES  bin	      lib   temp  work
+[root@9e300e238d05 apache-tomcat-8.5.66]# cd bin/
+[root@9e300e238d05 bin]# ls
+bootstrap.jar		      commons-daemon.jar  setclasspath.sh	tool-wrapper.bat
+catalina-tasks.xml	      configtest.bat	  shutdown.bat		tool-wrapper.sh
+catalina.bat		      configtest.sh	  shutdown.sh		version.bat
+catalina.sh		      daemon.sh		  startup.bat		version.sh
+ciphers.bat		      digest.bat	  startup.sh
+ciphers.sh		      digest.sh		  tomcat-juli.jar
+commons-daemon-native.tar.gz  setclasspath.bat	  tomcat-native.tar.gz
+
+give execute permission to  below files
+
+
+
+[root@9e300e238d05 bin]# chmod +x shutdown.sh
+[root@9e300e238d05 bin]# chmod +x startup.sh 
+
+in order to run tomcat we need java
+------------------------------------
+
+[root@9e300e238d05 bin]# yum install java-1.8.0-openjdk-devel
+
+
+start tomcat 
+-----------
+
+[root@9e300e238d05 bin]# ./startup.sh 
+Using CATALINA_BASE:   /opt/apache-tomcat-8.5.66
+Using CATALINA_HOME:   /opt/apache-tomcat-8.5.66
+Using CATALINA_TMPDIR: /opt/apache-tomcat-8.5.66/temp
+Using JRE_HOME:        /usr
+Using CLASSPATH:       /opt/apache-tomcat-8.5.66/bin/bootstrap.jar:/opt/apache-tomcat-8.5.66/bin/tomcat-juli.jar
+Tomcat started.
+
+
+ you should be able to access tomcat now as below 
+
+http://your-ip-addr:8888
+
+In case you want to access the Manage App, you will have to do some additional settings, as by default,
+ the Manager App section can only be accessed from the local system (i.e., 127.0.0.1).
+To overcome this, you will need to make some changes to context.xml file. To do so follow the below-mentioned steps:
+
+[root@9e300e238d05 bin]# find / -name context.xml
+/opt/apache-tomcat-8.5.66/conf/context.xml
+/opt/apache-tomcat-8.5.66/webapps/host-manager/META-INF/context.xml
+/opt/apache-tomcat-8.5.66/webapps/manager/META-INF/context.xml
+
+and edit  the file  context.xml in all above locations
+
+[root@9e300e238d05 bin]# vi /opt/apache-tomcat-8.5.66/webapps/host-manager/META-INF/context.xml
+
+
+[root@9e300e238d05 bin]# vi /opt/apache-tomcat-8.5.66/webapps/manager/META-INF/context.xml
+
+ value class 
+
+  comment the below line in both files
+<!--  <Valve className="org.apache.catalina.valves.RemoteAddrValve"
+         allow="127\.\d+\.\d+\.\d+|::1|0:0:0:0:0:0:0:1" /> -->
+
+shutdown and start the tomcat server
+
+root@9e300e238d05 conf]# cd ..
+[root@9e300e238d05 apache-tomcat-8.5.66]# cd bin/
+[root@9e300e238d05 bin]# ./shutdown.sh
+Using CATALINA_BASE:   /opt/apache-tomcat-8.5.66
+Using CATALINA_HOME:   /opt/apache-tomcat-8.5.66
+Using CATALINA_TMPDIR: /opt/apache-tomcat-8.5.66/temp
+Using JRE_HOME:        /usr
+Using CLASSPATH:       /opt/apache-tomcat-8.5.66/bin/bootstrap.jar:/opt/apache-tomcat-8.5.66/bin/tomcat-juli.jar
+[root@9e300e238d05 bin]# ./startup.sh
+Using CATALINA_BASE:   /opt/apache-tomcat-8.5.66
+Using CATALINA_HOME:   /opt/apache-tomcat-8.5.66
+Using CATALINA_TMPDIR: /opt/apache-tomcat-8.5.66/temp
+Using JRE_HOME:        /usr
+Using CLASSPATH:       /opt/apache-tomcat-8.5.66/bin/bootstrap.jar:/opt/apache-tomcat-8.5.66/bin/tomcat-juli.jar
+Tomcat started.
+
+adding  tomcat users  with roles
+---------------------------------
+
+[root@ip-172-31-29-229 apache-tomcat-8.5.43]# ls
+bin           conf             lib      logs    README.md      RUNNING.txt  webapps
+BUILDING.txt  CONTRIBUTING.md  LICENSE  NOTICE  RELEASE-NOTES  temp         work
+[root@ip-172-31-29-229 apache-tomcat-8.5.43]# cd conf/
+[root@ip-172-31-29-229 conf]# pwd
+/opt/apache-tomcat-8.5.43/conf
+[root@ip-172-31-29-229 conf]# ls
+Catalina         catalina.properties  jaspic-providers.xml  logging.properties  tomcat-users.xml  web.xml
+catalina.policy  context.xml          jaspic-providers.xsd  server.xml          tomcat-users.xsd
+[root@ip-172-31-29-229 conf]# vi tomcat-users.xml
+
+
+<!--
+  NOTE:  The sample user and role entries below are intended for use with the
+  examples web application. They are wrapped in a comment and thus are ignored
+  when reading this file. If you wish to configure these users for use with the
+  examples web application, do not forget to remove the <!.. ..> that surrounds
+  them. You will also need to set the passwords to something appropriate.
+-->
+        <role rolename="manager-gui"/>
+        <role rolename="manager-script"/>
+        <role rolename="manager-jmx"/>
+        <role rolename="manager-status"/>
+        <user username="admin" password="admin" roles="manager-gui, manager-script, manager-jmx, manager-status"/>
+        <user username="deployer" password="deployer" roles="manager-script"/>
+        <user username="tomcat" password="s3cret" roles="manager-gui"/>
+
+<!--
+  <role rolename="tomcat"/>
+  <role rolename="role1"/>
+  <user username="tomcat" password="<must-be-changed>" roles="tomcat"/>
+  <user username="both" password="<must-be-changed>" roles="tomcat,role1"/>
+  <user username="role1" password="<must-be-changed>" roles="role1"/>
+-->
+</tomcat-users>
+
+
+  [root@ip-172-31-29-229 conf]# tomcatdown
+Using CATALINA_BASE:   /opt/apache-tomcat-8.5.43
+Using CATALINA_HOME:   /opt/apache-tomcat-8.5.43
+Using CATALINA_TMPDIR: /opt/apache-tomcat-8.5.43/temp
+Using JRE_HOME:        /usr
+Using CLASSPATH:       /opt/apache-tomcat-8.5.43/bin/bootstrap.jar:/opt/apache-tomcat-8.5.43/bin/tomcat-juli.jar
+[root@ip-172-31-29-229 conf]# tomcatup
+Using CATALINA_BASE:   /opt/apache-tomcat-8.5.43
+Using CATALINA_HOME:   /opt/apache-tomcat-8.5.43
+Using CATALINA_TMPDIR: /opt/apache-tomcat-8.5.43/temp
+Using JRE_HOME:        /usr
+Using CLASSPATH:       /opt/apache-tomcat-8.5.43/bin/bootstrap.jar:/opt/apache-tomcat-8.5.43/bin/tomcat-juli.jar
+Tomcat started.
+
+  goback and login  to manager app with  user 
+tomcat/s3cret
+
+Step 6
+=======
+ 
+ now tomcat server is ready to accept our web application for the deployment.
+
+as the build generates .jar and .war files .. for the depoyement tomcat need .war file which webapp.war file copied
+in to /opt/apache-tomcat-8.5.66/webapps folder which is in the tomcat container.
+
+ to do that we will instal  the plugin deploy to container. install the plug from jenkins plugins
+
+once the plugin installed 
+
+ select the project go to configure
+under Post-build Actions
+
+  select deploy to container 
+under war/ear files give   **/*.war
+leave the context path blank
+ under add container select tomcat 8.x
+ give the deployer user under credentials
+give  http://172.19.0.4:8080/  where this is the container IP for tocat container
+
+save and apply .
+
+  trigger the build
+
+observ the console out
+
+ [JENKINS] Archiving /var/jenkins_home/workspace/CICDBasicPipeline/pom.xml to com.example.maven-project/maven-project/1.0-SNAPSHOT/maven-project-1.0-SNAPSHOT.pom
+channel stopped
+[DeployPublisher][INFO] Attempting to deploy 1 war file(s)
+[DeployPublisher][INFO] Deploying /var/jenkins_home/workspace/CICDBasicPipeline/webapp/target/webapp.war to container Tomcat 8.x Remote with context null
+  Redeploying [/var/jenkins_home/workspace/CICDBasicPipeline/webapp/target/webapp.war]
+  Undeploying [/var/jenkins_home/workspace/CICDBasicPipeline/webapp/target/webapp.war]
+  Deploying [/var/jenkins_home/workspace/CICDBasicPipeline/webapp/target/webapp.war]
+Finished: SUCCESS
+
+ it will deploy to a tomcat container
+
+  in the meantime go to the tomcat container and observe the webapps.war file has been copied as
+below
+ 
+
+[root@9e300e238d05 webapps]# ls -lrt
+total 16
+drwxr-x---.  3 root root 4096 Jul 22 06:05 ROOT
+drwxr-x---. 16 root root 4096 Jul 22 06:05 docs
+drwxr-x---.  6 root root   83 Jul 22 06:05 examples
+drwxr-x---.  5 root root   87 Jul 22 06:05 host-manager
+drwxr-x---.  5 root root 4096 Jul 22 06:05 manager
+-rw-r-----.  1 root root 2489 Jul 25 08:41 webapp.war
+drwxr-x---.  4 root root   54 Jul 25 08:41 webapp
+[root@9e300e238d05 webapps]# pwd
+/opt/apache-tomcat-8.5.66/webapps
+[root@9e300e238d05 webapps]# 
+
+ Step 7 
+ ======
+
+ enable CI CD
+
+ as the developer check in the code  to git  build shoud trigger and deployement should be done.
+ meaning one cycle of ci cd pipeline should complete.
+
+ under build triggers 
+in Poll SCM , enter below  
+ 
+ */2 * * * *
+
+  this wil allow jenkins to scan the code repo every 2 mnts with a code chek in or a commit.
+ appy and save.
+
+ now go to git hub  edit and do some change in the source code and commit.
+watch the build bar in jenkins  it will automatically trigger the pipeline.
+
+
+ 
+ also access the deployed app using tocat as below using your guest OS IP or with localhost
+ 
+ http://10.0.2.15:8888/webapp/
+ 
+
+
+ 
